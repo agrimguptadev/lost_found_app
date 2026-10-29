@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DPS Lost & Found</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Serif+Display:ital@0;1&family=Caveat:wght@600&display=swap">
+<style>
+/* Layout: one phone-width app column. Dark green header, cream sheet, orange actions.
+   Single light look, taken from the Design & Technology mock-up. */
+:root{
+  --green:#1f4b3a; --green-2:#2c6a50; --green-soft:#e1efe6;
+  --orange:#ef7a1a; --orange-soft:#fde6d4; --yellow:#f8c428;
+  --cream:#fbf7f1; --card:#ffffff; --line:#ebe3d6;
+  --ink:#1d2a24; --muted:#67736c; --outside:#e6e0d5;
+  --lav:#ebe7f8; --lav-ink:#7b62d8; --sky:#e2edf9; --sky-ink:#2f72d6; --sand:#fdf0d6;
+  --red:#e0362c;
+  --font:"Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --serif:"DM Serif Display", Georgia, "Times New Roman", serif;
+  --hand:"Caveat", "Segoe Print", "Comic Sans MS", cursive;
+  color-scheme: light;
+}
+html,body{height:100%}
+body{background:var(--outside);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--green)}
+button{font:inherit;color:inherit;cursor:pointer}
+input,textarea,select{font:inherit;color:var(--ink)}
+:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+svg{display:block}
+h1,h2,h3,p{margin:0}
+
+.app{max-width:440px;margin:0 auto;min-height:100%;background:var(--cream);position:relative;padding-bottom:110px;box-shadow:0 0 40px rgba(31,75,58,.12)}
+.app.no-nav{padding-bottom:24px}
+.pad{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* ---------- Home header ---------- */
+.hero{background:var(--green);color:#fff;padding-block:22px 52px;
+  background-image:radial-gradient(circle at 90% 10%,rgba(255,255,255,.08) 0 60px,transparent 61px),radial-gradient(circle at 75% 120%,rgba(255,255,255,.06) 0 90px,transparent 91px)}
+.hero-in{display:flex;align-items:center;gap:14px}
+.avatar{flex:none;width:64px;height:64px;border-radius:50%;background:#fff;border:3px solid var(--orange);display:grid;place-items:center;font-weight:800;color:var(--green);font-size:22px;letter-spacing:.02em}
+.greet{flex:1;min-width:0}
+.greet small{font-size:14px;opacity:.85}
+.greet h1{font-size:23px;font-weight:800;text-transform:uppercase;letter-spacing:.02em;line-height:1.15;overflow-wrap:anywhere}
+.greet .role{display:flex;align-items:center;gap:6px;font-size:14px;opacity:.9;margin-top:2px}
+.greet .role svg{width:16px;height:16px}
+.icon-btn{flex:none;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:transparent;border:0;position:relative;color:inherit}
+.icon-btn svg{width:26px;height:26px}
+.badge{position:absolute;top:3px;right:3px;min-width:19px;height:19px;border-radius:10px;background:var(--red);color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;padding:0 4px;border:2px solid var(--green);line-height:1}
+
+.sheet{background:var(--cream);border-radius:28px 28px 0 0;margin-top:-30px;position:relative;padding-block:20px 8px}
+.stack{display:flex;flex-direction:column;gap:24px}
+
+/* search */
+.search{display:flex;gap:10px}
+.search-box{flex:1;min-width:0;display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:0 14px;height:54px;box-shadow:0 2px 6px rgba(29,42,36,.04)}
+.search-box svg{width:22px;height:22px;color:var(--ink);flex:none}
+.search-box input{flex:1;min-width:0;border:0;background:transparent;outline:none;font-size:15px}
+.search-box input::placeholder{color:#9aa39e}
+.search-box .clear{border:0;background:var(--line);border-radius:50%;width:26px;height:26px;display:grid;place-items:center;padding:0}
+.search-box .clear svg{width:14px;height:14px}
+.scan{flex:none;width:54px;height:54px;border-radius:16px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center}
+.scan svg{width:26px;height:26px}
+
+/* carousel */
+.car{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;scrollbar-width:none;border-radius:22px}
+.car::-webkit-scrollbar{display:none}
+.slide{flex:0 0 100%;scroll-snap-align:center;border-radius:22px;color:#fff;padding:22px 20px;min-height:178px;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+.slide.s1{background:var(--green)}
+.slide.s2{background:var(--orange)}
+.slide.s3{background:var(--green-2)}
+.slide h2{font-family:var(--serif);font-style:italic;font-weight:400;font-size:27px;line-height:1.12;max-width:62%;position:relative;z-index:1}
+.slide p{font-size:14px;max-width:56%;opacity:.95;position:relative;z-index:1}
+.slide .art{position:absolute;right:-6px;bottom:-4px;width:46%;max-width:180px}
+.cta{margin-top:auto;position:relative;z-index:1;background:var(--yellow);color:var(--ink);font-weight:700;border-radius:12px;padding:10px 16px;border:0;display:inline-flex;align-items:center;gap:8px;font-size:15px;box-shadow:0 3px 0 rgba(0,0,0,.15)}
+.cta svg{width:18px;height:18px}
+.dots{display:flex;justify-content:center;gap:8px;margin-top:-12px}
+.dots span{width:8px;height:8px;border-radius:50%;background:#d6d0c5;transition:background .2s,width .2s}
+.dots span.on{background:var(--green);width:18px;border-radius:4px}
+
+/* quick actions */
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.qt{border:0;border-radius:18px;padding:12px 10px;min-height:118px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;text-align:left;gap:10px;position:relative}
+.qt .ic{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:#fff}
+.qt .ic svg{width:22px;height:22px}
+.qt b{font-size:13.5px;font-weight:700;line-height:1.25;padding-right:12px}
+.qt .chev{position:absolute;right:6px;bottom:14px;width:16px;height:16px;opacity:.7}
+.qt.lost{background:var(--orange-soft)} .qt.lost .ic{background:var(--orange)}
+.qt.found{background:var(--green-soft)} .qt.found .ic{background:var(--green-2)}
+.qt.mine{background:var(--lav)} .qt.mine .ic{background:var(--lav-ink)}
+.qt.msg{background:var(--sky)} .qt.msg .ic{background:var(--sky-ink)}
+
+/* sections */
+.sec{display:flex;flex-direction:column;gap:12px}
+.sec-h{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.sec-h h3{font-size:20px;font-weight:800;color:var(--green);letter-spacing:-.01em}
+.link{border:0;background:none;display:inline-flex;align-items:center;gap:4px;font-size:14px;font-weight:600;color:var(--ink);padding:6px 0}
+.link svg{width:16px;height:16px}
+
+.cats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.cat{border:0;border-radius:16px;padding:12px 4px 10px;display:flex;flex-direction:column;align-items:center;gap:8px;font-size:12.5px;font-weight:600}
+.cat svg{width:38px;height:38px}
+.t-Bags{background:#fbe8db}.t-Books{background:var(--sand)}.t-Electronics{background:#e1efe8}.t-Clothes{background:var(--lav)}.t-Others{background:var(--sky)}
+
+.hscroll{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x proximity;padding-bottom:6px;margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px))) calc(-1 * max(16px,env(safe-area-inset-right,0px)));padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px));scrollbar-width:none}
+.hscroll::-webkit-scrollbar{display:none}
+.rcard{flex:0 0 148px;scroll-snap-align:start;border:1px solid var(--line);background:var(--card);border-radius:18px;padding:10px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;position:relative}
+.rcard .thumb{width:100%;height:84px}
+.rcard b{font-size:14.5px;line-height:1.25;padding-right:14px}
+.rcard .chev{position:absolute;right:8px;top:118px;width:16px;height:16px;color:var(--muted)}
+.thumb{border-radius:12px;display:grid;place-items:center;overflow:hidden}
+.thumb svg{width:56%;height:auto;max-height:80%}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.meta{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);min-width:0}
+.meta svg{width:14px;height:14px;flex:none}
+.meta span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pill{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 10px;border-radius:7px;color:#fff;letter-spacing:.02em}
+.pill.found{background:var(--green-2)} .pill.lost{background:var(--orange)} .pill.returned{background:#8a948e}
+
+.mybtns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mybtn{border:0;border-radius:14px;color:#fff;padding:14px 12px;display:flex;align-items:center;gap:10px;font-weight:600;font-size:14px;text-align:left;position:relative;min-height:60px}
+.mybtn svg{width:28px;height:28px;flex:none}
+.mybtn .n{position:absolute;top:8px;right:10px;width:22px;height:22px;border-radius:50%;background:#fff;font-size:12px;font-weight:800;display:grid;place-items:center}
+.mybtn .chev{width:16px;height:16px;margin-left:auto;margin-top:14px}
+.mybtn.l{background:var(--green)} .mybtn.l .n{color:var(--green)}
+.mybtn.f{background:var(--orange)} .mybtn.f .n{color:var(--orange)}
+.rowbtn{border:1px solid var(--line);background:var(--card);border-radius:14px;display:flex;align-items:center;gap:12px;padding:12px 14px;font-size:14px;text-align:left;width:100%}
+.rowbtn > svg:first-child{width:22px;height:22px;color:var(--orange)}
+.rowbtn .grow{flex:1}
+.rowbtn .chev{width:16px;height:16px;color:var(--muted)}
+.dot-n{min-width:22px;height:22px;border-radius:11px;background:var(--red);color:#fff;font-size:12px;font-weight:800;display:grid;place-items:center;padding:0 6px}
+
+/* ---------- Bottom navigation ---------- */
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(440px,100%);z-index:20;background:var(--card);border-radius:22px 22px 0 0;box-shadow:0 -4px 20px rgba(29,42,36,.1);
+  display:grid;grid-template-columns:repeat(4,1fr) 82px;align-items:center;gap:4px;
+  padding:8px max(10px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px))}
+.nav button{border:0;background:none;border-radius:14px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px;font-size:12.5px;font-weight:600;color:var(--muted);position:relative}
+.nav button svg{width:24px;height:24px}
+.nav button.on{color:var(--orange);background:var(--orange-soft)}
+.nav .badge{border-color:var(--card);top:2px;right:calc(50% - 22px)}
+.fab{justify-self:center;width:64px;height:64px;border-radius:50% !important;background:var(--orange) !important;margin-top:-30px;box-shadow:0 6px 16px rgba(239,122,26,.45);padding:0 !important;display:grid !important;place-items:center}
+.fab svg{width:40px !important;height:40px !important}
+
+/* ---------- Sub-screens ---------- */
+.topbar{background:var(--green);color:#fff;position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.tb-in{display:flex;align-items:center;gap:6px;padding-block:10px;min-height:64px}
+.tb-in h2{font-size:19px;font-weight:800;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tb-in .icon-btn:first-child{margin-left:-8px}
+.tb-in .small-btn{border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;border-radius:10px;padding:6px 10px;font-size:13px;font-weight:600}
+.body{padding-block:18px}
+
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:20px;padding:7px 14px;font-size:13.5px;font-weight:600}
+.chip.on{background:var(--green);border-color:var(--green);color:#fff}
+
+.list{display:flex;flex-direction:column;gap:10px}
+.ritem{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px;text-align:left;width:100%}
+.ritem .thumb{width:68px;height:68px;flex:none}
+.ritem .info{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.ritem b{font-size:15px}
+.ritem .chev{width:18px;height:18px;color:var(--muted);flex:none}
+.empty{text-align:center;color:var(--muted);padding:36px 12px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.empty svg{width:44px;height:44px;color:#c4bcae}
+.count{font-size:13px;color:var(--muted)}
+
+/* detail */
+.photo-big{height:220px;border-radius:20px}
+.photo-big svg{width:42%;max-height:75%}
+.d-title{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.d-title h1{font-size:26px;font-weight:800;letter-spacing:-.01em;text-wrap:balance}
+.facts{background:var(--card);border:1px solid var(--line);border-radius:16px;display:flex;flex-direction:column}
+.fact{display:flex;gap:12px;align-items:center;padding:12px 14px}
+.fact + .fact{border-top:1px solid var(--line)}
+.fact svg{width:20px;height:20px;color:var(--green-2);flex:none}
+.fact small{display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.fact span{font-weight:600}
+.desc{font-size:15px;line-height:1.6;max-width:65ch}
+.actions{display:flex;flex-direction:column;gap:10px}
+.primary{border:0;border-radius:14px;background:var(--green);color:#fff;font-weight:700;font-size:16px;padding:15px 18px;display:flex;align-items:center;justify-content:center;gap:8px;width:100%}
+.primary.orange{background:var(--orange)}
+.primary svg{width:20px;height:20px}
+.secondary{border:1.5px solid var(--line);border-radius:14px;background:var(--card);font-weight:700;font-size:15px;padding:13px 18px;display:flex;align-items:center;justify-content:center;gap:8px;width:100%}
+.secondary svg{width:18px;height:18px}
+.secondary.danger{color:var(--red)}
+.confirm{border:1.5px solid #f3c2bd;background:#fff5f4;border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.confirm .row{display:flex;gap:10px}
+.confirm .row button{flex:1}
+.note{font-size:13px;color:var(--muted)}
+
+/* form */
+.form{display:flex;flex-direction:column;gap:16px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field > label,.lbl{font-size:13px;font-weight:700;color:var(--green)}
+.field input,.field textarea{border:1.5px solid var(--line);background:var(--card);border-radius:12px;padding:12px 14px;font-size:15px;outline:none;width:100%;box-sizing:border-box}
+.field textarea{min-height:90px;resize:vertical}
+.field input:focus,.field textarea:focus{border-color:var(--green-2)}
+.field.bad input{border-color:var(--red)}
+.ferr{color:var(--red);font-size:13px;font-weight:600}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:#efe9df;border-radius:14px;padding:4px;gap:4px}
+.seg button{border:0;background:transparent;border-radius:11px;padding:11px 6px;font-weight:700;font-size:14px;color:var(--muted)}
+.seg button.on[data-t="lost"]{background:var(--orange);color:#fff}
+.seg button.on[data-t="found"]{background:var(--green-2);color:#fff}
+.photo-pick{border:2px dashed #d8cfbf;border-radius:16px;height:150px;display:grid;place-items:center;background:var(--card);cursor:pointer;overflow:hidden;color:var(--muted);font-weight:600;font-size:14px}
+.photo-pick .in{display:flex;flex-direction:column;align-items:center;gap:6px}
+.photo-pick svg{width:30px;height:30px}
+.photo-pick img{width:100%;height:100%;object-fit:cover}
+.catpick{display:flex;flex-wrap:wrap;gap:8px}
+.catpick input{position:absolute;opacity:0;pointer-events:none}
+.catpick label{border:1.5px solid var(--line);background:var(--card);border-radius:20px;padding:7px 14px;font-size:14px;font-weight:600;cursor:pointer}
+.catpick input:checked + label{background:var(--green);border-color:var(--green);color:#fff}
+.catpick input:focus-visible + label{outline:3px solid var(--orange);outline-offset:2px}
+
+/* messages */
+.crow{display:flex;gap:12px;align-items:center;padding:12px;background:var(--card);border:1px solid var(--line);border-radius:16px;text-align:left;width:100%}
+.ava{flex:none;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#fff;background:var(--green-2);font-size:15px}
+.crow .info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.crow .top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.crow .top b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.crow time{font-size:12px;color:var(--muted);flex:none;font-variant-numeric:tabular-nums}
+.crow .last{font-size:13.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.crow.unread .last{color:var(--ink);font-weight:600}
+.crow .about{font-size:12px;color:var(--orange);font-weight:700}
+.thread{display:flex;flex-direction:column;gap:8px;padding-block:16px 100px}
+.bub{max-width:80%;padding:10px 14px;border-radius:18px;font-size:14.5px;line-height:1.45;overflow-wrap:anywhere}
+.bub small{display:block;font-size:11px;opacity:.7;margin-top:3px;font-variant-numeric:tabular-nums}
+.bub.them{background:var(--card);border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:6px}
+.bub.me{background:var(--green);color:#fff;align-self:flex-end;border-bottom-right-radius:6px}
+.typing{align-self:flex-start;color:var(--muted);font-size:13px;font-style:italic}
+.about-card{margin-top:14px}
+.composer{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(440px,100%);background:var(--card);border-top:1px solid var(--line);display:flex;gap:8px;z-index:20;
+  padding:10px max(12px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px))}
+.composer input{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:24px;padding:11px 16px;outline:none;font-size:15px}
+.composer input:focus{border-color:var(--green-2)}
+.composer button{flex:none;width:46px;height:46px;border-radius:50%;border:0;background:var(--orange);color:#fff;display:grid;place-items:center}
+.composer button svg{width:20px;height:20px}
+
+/* alerts */
+.arow{display:flex;gap:12px;align-items:flex-start;padding:14px;background:var(--card);border:1px solid var(--line);border-radius:16px;text-align:left;width:100%}
+.arow .aic{flex:none;width:38px;height:38px;border-radius:50%;background:var(--orange-soft);color:var(--orange);display:grid;place-items:center}
+.arow .aic svg{width:20px;height:20px}
+.arow .info{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.arow time{font-size:12px;color:var(--muted)}
+.arow.unread{border-color:#f6c9a5;background:#fffaf5}
+.arow.unread .info span{font-weight:700}
+.udot{width:9px;height:9px;border-radius:50%;background:var(--orange);flex:none;margin-top:6px}
+
+/* profile */
+.prof{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding-block:8px}
+.prof .avatar{width:88px;height:88px;font-size:30px}
+.prof h1{font-size:22px;font-weight:800}
+.prof p{color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 8px;text-align:center}
+.stat b{display:block;font-size:24px;font-weight:800;color:var(--green);font-variant-numeric:tabular-nums}
+.stat span{font-size:12.5px;color:var(--muted)}
+
+/* modal sheet */
+.modal{position:fixed;inset:0;background:rgba(20,35,28,.45);z-index:40;display:flex;align-items:flex-end;justify-content:center;animation:fade .2s}
+.mcard{width:min(440px,100%);background:var(--cream);border-radius:24px 24px 0 0;display:flex;flex-direction:column;gap:12px;max-height:85%;overflow:auto;
+  padding:20px max(18px,env(safe-area-inset-right,0px)) calc(22px + env(safe-area-inset-bottom,0px)) max(18px,env(safe-area-inset-left,0px));animation:up .25s ease-out}
+.mcard h3{font-size:19px;font-weight:800;color:var(--green)}
+.mcard .grab{width:40px;height:5px;border-radius:3px;background:#d8cfbf;align-self:center;margin-top:-8px}
+.steps{display:flex;flex-direction:column;gap:12px;margin:0;padding:0;list-style:none;counter-reset:s}
+.steps li{display:flex;gap:12px;align-items:flex-start;counter-increment:s}
+.steps li::before{content:counter(s);flex:none;width:28px;height:28px;border-radius:50%;background:var(--orange);color:#fff;font-weight:800;display:grid;place-items:center;font-size:14px}
+@keyframes fade{from{opacity:0}}
+@keyframes up{from{transform:translateY(40px)}}
+
+.toast{position:fixed;left:50%;bottom:120px;transform:translateX(-50%);background:var(--green);color:#fff;padding:11px 18px;border-radius:24px;font-weight:600;font-size:14px;z-index:60;box-shadow:0 6px 18px rgba(0,0,0,.2);max-width:calc(100% - 32px);text-align:center;animation:up .2s}
+
+/* ---------- Splash ---------- */
+.splash{position:fixed;inset:0;z-index:80;background:var(--outside);display:flex;justify-content:center;transition:opacity .45s;cursor:pointer}
+.splash.hide{opacity:0;pointer-events:none}
+.sp{width:min(440px,100%);height:100%;background:var(--cream);display:flex;flex-direction:column;position:relative;overflow:hidden}
+.sp-top{background:linear-gradient(180deg,#f08a2c,#ec7413);color:#fff;text-align:center;padding:calc(36px + env(safe-area-inset-top,0px)) 16px 90px;flex:none}
+.sp-top .k{letter-spacing:.6em;font-size:15px;font-weight:600;padding-left:.6em}
+.sp-top .os{font-family:var(--serif);font-size:92px;line-height:.95}
+.sp-top p{font-size:17px;line-height:1.4;opacity:.95}
+.sp-mid{flex:1;margin-top:-64px;background:var(--cream);border-radius:50% 50% 0 0 / 60px 60px 0 0;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:0 16px 20px;min-height:0}
+.sp-mid .box{width:150px;margin-top:-56px}
+.sp-mid h1{font-size:44px;font-weight:800;color:var(--green);letter-spacing:-.03em;line-height:1}
+.sp-mid h1 em{font-style:normal;color:var(--orange)}
+.sp-mid .tag{font-size:11.5px;letter-spacing:.18em;color:var(--muted);font-weight:600}
+.sp-mid .q{font-size:17px;color:var(--muted);line-height:1.35;margin-top:4px}
+.sp-mid .hand{font-family:var(--hand);font-size:30px;color:var(--orange);transform:rotate(-4deg);line-height:1}
+.sp-mid .school{font-weight:800;font-size:20px;color:var(--green);letter-spacing:.02em;margin-top:auto}
+.loading{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:14px}
+.spin{width:22px;height:22px;border-radius:50%;border:3px solid var(--orange-soft);border-top-color:var(--orange);animation:spin .8s linear infinite}
+.sp-foot{height:calc(26px + env(safe-area-inset-bottom,0px));background:var(--green);flex:none;border-top:6px solid var(--orange)}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (max-height:700px){.sp-top .os{font-size:70px}.sp-top{padding-bottom:76px}.sp-mid .box{width:120px}.sp-mid h1{font-size:38px}}
+
+@media (max-width:370px){.quick{gap:6px}.qt{padding:10px 8px}.qt b{font-size:12.5px}.cat{font-size:11.5px}.greet h1{font-size:20px}}
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}.car{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<div class="splash" id="splash" aria-label="Lost and Found is loading">
+  <div class="sp">
+    <div class="sp-top">
+      <div class="k">SCHOOLS</div>
+      <div class="os">OS</div>
+      <p>More than software,<br>A CEO for your school</p>
+    </div>
+    <div class="sp-mid">
+      <svg class="box" viewBox="0 0 150 130" aria-hidden="true">
+        <g stroke="#f8c428" stroke-width="5" stroke-linecap="round"><path d="M30 22l9 10"/><path d="M75 4v12"/><path d="M120 22l-9 10"/><path d="M14 52h12"/></g>
+        <path d="M35 50 L75 30 L115 50 L75 70Z" fill="#2c6a50"/>
+        <path d="M35 50 L75 70 L75 120 L35 100Z" fill="#1f4b3a"/>
+        <path d="M75 70 L115 50 L115 100 L75 120Z" fill="#173a2c"/>
+        <text x="55" y="103" font-family="Georgia,serif" font-size="34" font-weight="700" fill="#fff" text-anchor="middle">?</text>
+        <circle cx="104" cy="88" r="17" fill="#e1efe6" stroke="#2c6a50" stroke-width="6"/>
+        <path d="M116 101 L130 116" stroke="#1f4b3a" stroke-width="9" stroke-linecap="round"/>
+      </svg>
+      <h1>Lost <em>&amp;</em> Found</h1>
+      <div class="tag">SAME CAMPUS · SAME FAMILY · OUR COMMUNITY</div>
+      <div class="q">Lost something?<br>Found something?</div>
+      <div class="hand">Let's bring it back.</div>
+      <div class="school">DPS INDIRAPURAM</div>
+      <div class="loading"><span class="spin"></span>Loading…</div>
+    </div>
+    <div class="sp-foot"></div>
+  </div>
+</div>
+
+<div class="app" id="app"></div>
+<input type="file" id="scanInput" accept="image/*" hidden>
+
+<script>
+/* =========================================================
+   DPS Lost & Found — Design & Technology group project
+   Plain HTML + CSS + JavaScript. No libraries.
+   Data is saved in this browser (localStorage).
+   ========================================================= */
+
+/* ---------- 1. Icons (small line drawings) ---------- */
+const svg = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+const I = {
+  search: svg('<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>'),
+  scan:   svg('<path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><circle cx="12" cy="10" r="2.5"/><path d="M8 16c.8-1.6 2.3-2.5 4-2.5s3.2.9 4 2.5"/>'),
+  bell:   svg('<path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/>'),
+  menu:   svg('<path d="M4 7h16M4 12h16M4 17h16"/>'),
+  chev:   svg('<path d="m9 6 6 6-6 6"/>'),
+  arrow:  svg('<path d="M5 12h14M13 6l6 6-6 6"/>'),
+  back:   svg('<path d="M15 6l-6 6 6 6"/>'),
+  pin:    svg('<path d="M12 21s-6-5.6-6-11a6 6 0 0 1 12 0c0 5.4-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/>'),
+  cal:    svg('<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>'),
+  home:   svg('<path d="M4 11 12 4l8 7v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"/>'),
+  chat:   svg('<path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-5 4z"/><path d="M8.5 10.5h.01M12 10.5h.01M15.5 10.5h.01"/>'),
+  user:   svg('<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>'),
+  cap:    svg('<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3 2 9 2 12 0v-5"/>'),
+  box:    svg('<path d="M12 3 4 7v10l8 4 8-4V7z"/><path d="M4 7l8 4 8-4M12 11v10"/>'),
+  list:   svg('<rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 3h6v3H9zM9 11h6M9 15h4"/>'),
+  camera: svg('<path d="M4 8a2 2 0 0 1 2-2h2l2-2h4l2 2h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3.5"/>'),
+  check:  svg('<path d="m5 12 5 5 9-10"/>'),
+  trash:  svg('<path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/>'),
+  send:   svg('<path d="M4 12 20 4l-6 16-3-7z"/>'),
+  x:      svg('<path d="M6 6l12 12M18 6 6 18"/>'),
+  tag:    svg('<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.5"/>'),
+  info:   svg('<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/>'),
+  reset:  svg('<path d="M4 12a8 8 0 1 0 3-6.2"/><path d="M4 4v5h5"/>')
+};
+
+/* ---------- 2. Item pictures (used when there is no photo) ---------- */
+const art = p => `<svg viewBox="0 0 48 48" aria-hidden="true">${p}</svg>`;
+const ART = {
+  backpack: art('<path d="M18 11a6 6 0 0 1 12 0" fill="none" stroke="#1d3c6e" stroke-width="3"/><rect x="10" y="12" width="28" height="31" rx="9" fill="#2c5aa0"/><rect x="15" y="27" width="18" height="11" rx="4" fill="#1d3c6e"/><rect x="15" y="20" width="18" height="3" rx="1.5" fill="#1d3c6e"/><rect x="22" y="29" width="4" height="2" rx="1" fill="#8fb0e0"/>'),
+  bottle:   art('<rect x="19" y="5" width="10" height="7" rx="2" fill="#3a3a3a"/><rect x="16" y="11" width="16" height="32" rx="6" fill="#1f1f1f"/><rect x="19.5" y="17" width="3" height="19" rx="1.5" fill="#575757"/>'),
+  earbuds:  art('<circle cx="19" cy="16" r="4.5" fill="#fff" stroke="#c4ccc7" stroke-width="1.5"/><circle cx="29" cy="16" r="4.5" fill="#fff" stroke="#c4ccc7" stroke-width="1.5"/><rect x="10" y="18" width="28" height="22" rx="10" fill="#fff" stroke="#c4ccc7" stroke-width="1.5"/><path d="M10.8 26h26.4" stroke="#c4ccc7" stroke-width="1.5"/><circle cx="24" cy="32" r="1.6" fill="#a5afa9"/>'),
+  book:     art('<path d="M24 12c-4-3-10-3-15-2v26c5-1 11-1 15 2 4-3 10-3 15-2V10c-5-1-11-1-15 2z" fill="#f39b2f"/><path d="M24 12v26" stroke="#c96f12" stroke-width="2"/><path d="M13 17h7M13 22h7M28 17h7M28 22h7" stroke="#fff" stroke-width="2" stroke-linecap="round"/>'),
+  phone:    art('<rect x="15" y="5" width="18" height="38" rx="4" fill="#24313a"/><rect x="17.5" y="9" width="13" height="27" rx="1.5" fill="#5f8fb4"/><circle cx="24" cy="39.5" r="1.3" fill="#8aa0ad"/>'),
+  shirt:    art('<path d="M17 7l-9 5 3 8 4-2v23h18V18l4 2 3-8-9-5c-1 3-3.5 4.5-7 4.5S18 10 17 7z" fill="#5b3fd1"/>'),
+  calculator: art('<rect x="12" y="5" width="24" height="38" rx="4" fill="#2f3a36"/><rect x="16" y="9" width="16" height="8" rx="1.5" fill="#b7d3c4"/><g fill="#8b9893"><circle cx="18.5" cy="23" r="2"/><circle cx="24" cy="23" r="2"/><circle cx="29.5" cy="23" r="2"/><circle cx="18.5" cy="29" r="2"/><circle cx="24" cy="29" r="2"/><circle cx="29.5" cy="29" r="2"/><circle cx="18.5" cy="35" r="2"/><circle cx="24" cy="35" r="2"/></g><circle cx="29.5" cy="35" r="2" fill="#ef7a1a"/>'),
+  box:      art('<rect x="7" y="15" width="34" height="21" rx="4" fill="#2c6fc0"/><rect x="7" y="15" width="34" height="7" rx="3" fill="#1f569a"/><path d="M17 31l7-6 7 6" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/>'),
+  others:   art('<rect x="8" y="8" width="32" height="32" rx="10" fill="#2f6fe0"/><circle cx="17" cy="24" r="2.6" fill="#fff"/><circle cx="24" cy="24" r="2.6" fill="#fff"/><circle cx="31" cy="24" r="2.6" fill="#fff"/>')
+};
+const CATS = ['Bags','Books','Electronics','Clothes','Others'];
+const CAT_ART = {Bags:'backpack',Books:'book',Electronics:'phone',Clothes:'shirt',Others:'others'};
+const CAT_KIND = {Bags:'backpack',Books:'book',Electronics:'phone',Clothes:'shirt',Others:'box'};
+const PLACES = ['Library','Canteen','Sports Ground','Science Block','Computer Lab','Maths Lab','Art Room','Music Room','Auditorium','School Bus','Main Gate','Reception'];
+
+/* ---------- 3. Data ---------- */
+const ME = { name:'Agrim Gupta', initials:'AG', cls:'Class 8', role:'Student', school:'DPS Indirapuram' };
+const KEY = 'dps-lost-found-v1';
+
+function seed(){
+  return {
+    items:[
+      {id:'i1',title:'Blue Backpack',status:'found',cat:'Bags',kind:'backpack',loc:'Near Science Block',date:'2026-10-28',desc:'Navy blue backpack with a grey zip pocket. There is a maths notebook inside. It is kept at the reception desk.',by:'Riya Sharma',byInfo:'Class 8A',mine:false},
+      {id:'i2',title:'Water Bottle',status:'lost',cat:'Others',kind:'bottle',loc:'Inside Class 8B',date:'2026-10-27',desc:'Black steel bottle, 750 ml. Small scratch near the cap.',by:ME.name,byInfo:ME.cls,mine:true},
+      {id:'i3',title:'AirPods',status:'found',cat:'Electronics',kind:'earbuds',loc:'Library',date:'2026-10-26',desc:'White AirPods case found on the reading table near the window. Given to the librarian.',by:ME.name,byInfo:ME.cls,mine:true},
+      {id:'i4',title:'Science Textbook',status:'lost',cat:'Books',kind:'book',loc:'Canteen',date:'2026-10-25',desc:'Class 8 Science textbook. The name "Kabir M." is written on the first page.',by:'Kabir Mehta',byInfo:'Class 8C',mine:false},
+      {id:'i5',title:'Grey Hoodie',status:'found',cat:'Clothes',kind:'shirt',loc:'Sports Ground',date:'2026-10-24',desc:'Grey hoodie, size M. It was left on the bench after the PE period.',by:'Mr. Rawat',byInfo:'PE Teacher',mine:false},
+      {id:'i6',title:'Calculator',status:'lost',cat:'Electronics',kind:'calculator',loc:'Maths Lab',date:'2026-10-23',desc:'Casio scientific calculator in a black cover.',by:'Ananya Singh',byInfo:'Class 8B',mine:false},
+      {id:'i7',title:'Geometry Box',status:'found',cat:'Others',kind:'box',loc:'Art Room',date:'2026-10-22',desc:'Blue geometry box with a compass and a protractor inside.',by:ME.name,byInfo:ME.cls,mine:true}
+    ],
+    chats:[
+      {id:'c1',with:'Riya Sharma',itemId:'i1',unread:1,replied:false,msgs:[{me:false,t:'Hi Agrim, is this backpack yours? It has a maths notebook inside.',at:'2026-10-28T15:10'}]},
+      {id:'c2',with:'Ishaan Verma',itemId:'i3',unread:1,replied:false,msgs:[{me:false,t:'I think the AirPods you found are mine. They have a small star sticker on the back.',at:'2026-10-27T13:40'}]},
+      {id:'c3',with:'Lost & Found Desk',itemId:null,unread:1,replied:true,msgs:[{me:false,t:'Reminder: items that nobody collects are kept at the reception for 30 days.',at:'2026-10-26T09:00'}]}
+    ],
+    alerts:[
+      {id:'a1',t:'New found item: Blue Backpack near the Science Block',at:'2026-10-28T14:55',read:false,itemId:'i1'},
+      {id:'a2',t:'Ishaan replied about the AirPods you found',at:'2026-10-27T13:41',read:false,itemId:'i3'},
+      {id:'a3',t:'Your post "Water Bottle" is now live',at:'2026-10-27T08:20',read:false,itemId:'i2'}
+    ]
+  };
+}
+function load(){ try{ const r = localStorage.getItem(KEY); if(r) return JSON.parse(r); }catch(e){} return seed(); }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast('Could not save on this device. Try a smaller photo.'); } }
+let S = load();
+
+/* ---------- 4. Helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const fmtDate = iso => { const [y,m,d] = iso.split('-').map(Number); return `${d} ${MON[m-1]} ${y}`; };
+const todayISO = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+const nowISO = () => { const d = new Date(); return todayISO() + 'T' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0'); };
+const fmtTime = at => at.slice(0,10) === todayISO() ? at.slice(11,16) : fmtDate(at.slice(0,10)).replace(/ \d{4}$/,'');
+const initials = n => n.replace(/[^A-Za-z ]/g,'').split(' ').filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase() || '?';
+const byId = id => S.items.find(i => i.id === id);
+const statusLabel = s => ({found:'Found', lost:'Lost', returned:'Returned'}[s]);
+const sorted = () => [...S.items].sort((a,b) => b.date.localeCompare(a.date));
+const unreadChats = () => S.chats.filter(c => c.unread > 0).length;
+const unreadAlerts = () => S.alerts.filter(a => !a.read).length;
+const pic = it => it.photo ? `<img src="${it.photo}" alt="Photo of ${esc(it.title)}">` : (ART[it.kind] || ART.box);
+const AVA_COLORS = ['#2c6a50','#ef7a1a','#7b62d8','#2f72d6','#c0477a'];
+const avaColor = n => AVA_COLORS[[...n].reduce((s,c)=>s+c.charCodeAt(0),0) % AVA_COLORS.length];
+function greeting(){ const h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'; }
+
+function toast(msg){
+  document.querySelectorAll('.toast').forEach(t => t.remove());
+  const t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role','status'); t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2600);
+}
+function modal(html){
+  closeModal();
+  const m = document.createElement('div'); m.className = 'modal'; m.id = 'modal';
+  m.innerHTML = `<div class="mcard" role="dialog" aria-modal="true"><div class="grab"></div>${html}</div>`;
+  m.addEventListener('click', e => { if(e.target === m) closeModal(); });
+  document.body.appendChild(m);
+  const f = m.querySelector('button'); f && f.focus();
+}
+function closeModal(){ const m = $('#modal'); m && m.remove(); }
+
+/* ---------- 5. Navigation (a simple screen stack) ---------- */
+let stack = [{v:'home'}];
+let Q = '';            // search text
+let carTimer = null;   // banner auto-scroll
+const cur = () => stack[stack.length-1];
+function go(v, p={}){ stack.push({v, ...p}); render(); window.scrollTo(0,0); }
+function tab(v){ stack = [{v}]; render(); window.scrollTo(0,0); }
+function back(){ if(stack.length > 1) stack.pop(); else stack = [{v:'home'}]; render(); }
+function replace(v, p={}){ stack[stack.length-1] = {v, ...p}; render(); window.scrollTo(0,0); }
+
+const TABS = ['home','messages','alerts','profile'];
+function render(){
+  clearInterval(carTimer);
+  const c = cur();
+  const app = $('#app');
+  const showNav = TABS.includes(c.v);
+  app.className = 'app' + (showNav ? '' : ' no-nav');
+  app.innerHTML = VIEWS[c.v](c) + (showNav ? navBar(c.v) : '');
+  AFTER[c.v] && AFTER[c.v](c);
+}
+
+function navBar(active){
+  const b = (v, icon, label, n) => `<button class="${active===v?'on':''}" data-a="tab" data-v="${v}" aria-label="${label}">${icon}${n?`<span class="badge">${n}</span>`:''}${label}</button>`;
+  return `<nav class="nav" aria-label="Main">
+    ${b('home', I.home, 'Home')}
+    ${b('messages', I.chat, 'Messages', unreadChats())}
+    ${b('alerts', I.bell, 'Alerts', unreadAlerts())}
+    ${b('profile', I.user, 'Profile')}
+    <button class="fab" data-a="fab" aria-label="Report an item">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="14" cy="18" r="3" fill="#1d2a24"/><circle cx="26" cy="18" r="3" fill="#1d2a24"/><path d="M14 25c3 3 9 3 12 0" stroke="#1d2a24" stroke-width="2.5" fill="none" stroke-linecap="round"/><circle cx="10" cy="24" r="2.2" fill="#f7a35c"/><circle cx="30" cy="24" r="2.2" fill="#f7a35c"/></svg>
+    </button>
+  </nav>`;
+}
+function topbar(title, opts={}){
+  return `<div class="topbar"><div class="pad tb-in">
+    ${opts.noBack ? '' : `<button class="icon-btn" data-a="back" aria-label="Back">${I.back}</button>`}
+    <h2>${esc(title)}</h2>${opts.right || ''}
+  </div></div>`;
+}
+
+/* ---------- 6. Small building blocks ---------- */
+function recentCard(it){
+  return `<button class="rcard" data-a="open" data-id="${it.id}">
+    <div class="thumb t-${it.cat}">${pic(it)}</div>
+    <span class="pill ${it.status}">${statusLabel(it.status)}</span>
+    <b>${esc(it.title)}</b>
+    <span class="meta">${I.pin}<span>${esc(it.loc)}</span></span>
+    <span class="meta">${I.cal}<span>${fmtDate(it.date)}</span></span>
+    <span class="chev">${I.chev}</span>
+  </button>`;
+}
+function rowItem(it){
+  return `<button class="ritem" data-a="open" data-id="${it.id}">
+    <div class="thumb t-${it.cat}">${pic(it)}</div>
+    <div class="info">
+      <span><span class="pill ${it.status}">${statusLabel(it.status)}</span></span>
+      <b>${esc(it.title)}</b>
+      <span class="meta">${I.pin}<span>${esc(it.loc)} · ${fmtDate(it.date)}</span></span>
+    </div>
+    <span class="chev">${I.chev}</span>
+  </button>`;
+}
+function emptyBox(text){ return `<div class="empty">${I.box}<p>${text}</p></div>`; }
+function itemList(items, emptyText){ return items.length ? `<div class="list">${items.map(rowItem).join('')}</div>` : emptyBox(emptyText); }
+
+/* ---------- 7. Screens ---------- */
+const VIEWS = {};
+const AFTER = {};
+
+/* HOME */
+VIEWS.home = () => `
+  <header class="hero"><div class="pad hero-in">
+    <div class="avatar" aria-hidden="true">${ME.initials}</div>
+    <div class="greet">
+      <small>${greeting()}</small>
+      <h1>${esc(ME.name)}</h1>
+      <div class="role">${I.cap}${ME.role}</div>
+    </div>
+    <button class="icon-btn" data-a="tab" data-v="alerts" aria-label="Alerts">${I.bell}${unreadAlerts()?`<span class="badge">${unreadAlerts()}</span>`:''}</button>
+    <button class="icon-btn" data-a="menu" aria-label="Menu">${I.menu}</button>
+  </div></header>
+  <main class="sheet"><div class="pad stack">
+    <div class="search">
+      <label class="search-box">${I.search}
+        <input id="q" type="search" placeholder="Search for lost or found items..." value="${esc(Q)}" autocomplete="off" aria-label="Search for lost or found items">
+        <button class="clear" data-a="clearq" aria-label="Clear search" ${Q?'':'hidden'}>${I.x}</button>
+      </label>
+      <button class="scan" data-a="scan" aria-label="Report a found item with a photo">${I.scan}</button>
+    </div>
+    <div id="homeBody" class="stack"></div>
+  </div></main>`;
+
+function homeBody(){
+  if(Q.trim()){
+    const q = Q.trim().toLowerCase();
+    const res = sorted().filter(i => [i.title,i.loc,i.cat,i.desc,i.by].join(' ').toLowerCase().includes(q));
+    return `<section class="sec">
+      <div class="sec-h"><h3>Results</h3><span class="count">${res.length} item${res.length===1?'':'s'}</span></div>
+      ${itemList(res, `No items match "${esc(Q.trim())}". Try another word, like "bottle" or "library".`)}
+    </section>`;
+  }
+  const recent = sorted().filter(i => i.status !== 'returned').slice(0,6);
+  const myLost = S.items.filter(i => i.mine && i.status==='lost').length;
+  const myFound = S.items.filter(i => i.mine && i.status==='found').length;
+  const notes = unreadChats() + unreadAlerts();
+  return `
+  <div>
+    <div class="car" id="car" aria-label="News">
+      <div class="slide s1">
+        <h2>Lost something? Found something?</h2>
+        <p>Post it here and help it find its way back!</p>
+        <button class="cta" data-a="fab">Report Item ${I.arrow}</button>
+        <div class="art" aria-hidden="true"><svg viewBox="0 0 120 100"><g transform="translate(18 6) scale(1.85)">${ART.backpack.replace(/<\/?svg[^>]*>/g,'')}</g><g transform="translate(78 40) scale(1.1)">${ART.bottle.replace(/<\/?svg[^>]*>/g,'').replace(/#1f1f1f/,'#ef7a1a').replace(/#3a3a3a/,'#c9600f').replace(/#575757/,'#f7a35c')}</g><g stroke="#f8c428" stroke-width="3" stroke-linecap="round"><path d="M14 18l6 6"/><path d="M100 14l-4 7"/><path d="M108 28h-7"/></g></svg></div>
+      </div>
+      <div class="slide s2">
+        <h2>Found an item on campus?</h2>
+        <p>Hand it to the reception on the same day and post it here.</p>
+        <button class="cta" data-a="report" data-t="found">Report Found Item ${I.arrow}</button>
+        <div class="art" aria-hidden="true" style="width:34%;right:10px;bottom:12px">${ART.earbuds}</div>
+      </div>
+      <div class="slide s3">
+        <h2>Check new items every day</h2>
+        <p>Your lost item may already be at the reception.</p>
+        <button class="cta" data-a="list" data-title="All Items">View all items ${I.arrow}</button>
+        <div class="art" aria-hidden="true" style="width:32%;right:12px;bottom:12px">${ART.book}</div>
+      </div>
+    </div>
+  </div>
+  <div class="dots" id="dots" aria-hidden="true"><span class="on"></span><span></span><span></span></div>
+
+  <div class="quick">
+    <button class="qt lost" data-a="report" data-t="lost"><span class="ic">${I.search}</span><b>Report Lost Item</b><span class="chev">${I.chev}</span></button>
+    <button class="qt found" data-a="report" data-t="found"><span class="ic">${I.box}</span><b>Report Found Item</b><span class="chev">${I.chev}</span></button>
+    <button class="qt mine" data-a="go" data-v="mine"><span class="ic">${I.list}</span><b>My Items</b><span class="chev">${I.chev}</span></button>
+    <button class="qt msg" data-a="tab" data-v="messages"><span class="ic">${I.chat}</span><b>Messages</b><span class="chev">${I.chev}</span></button>
+  </div>
+
+  <section class="sec">
+    <div class="sec-h"><h3>Browse by Category</h3><button class="link" data-a="list" data-title="All Items">View all ${I.arrow}</button></div>
+    <div class="cats">${CATS.map(c => `<button class="cat t-${c}" data-a="list" data-title="${c}" data-cat="${c}">${ART[CAT_ART[c]]}${c}</button>`).join('')}</div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-h"><h3>Recent Items</h3><button class="link" data-a="list" data-title="All Items">View all ${I.arrow}</button></div>
+    ${recent.length ? `<div class="hscroll">${recent.map(recentCard).join('')}</div>` : emptyBox('No items yet.')}
+  </section>
+
+  <section class="sec">
+    <div class="sec-h"><h3>My Items</h3></div>
+    <div class="mybtns">
+      <button class="mybtn l" data-a="go" data-v="mine" data-f="lost">${I.box}<span>My Lost Items</span><span class="n">${myLost}</span><span class="chev">${I.chev}</span></button>
+      <button class="mybtn f" data-a="go" data-v="mine" data-f="found">${I.box}<span>My Found Items</span><span class="n">${myFound}</span><span class="chev">${I.chev}</span></button>
+    </div>
+    <button class="rowbtn" data-a="tab" data-v="messages">${I.bell}<span class="grow">Messages / Notifications</span>${notes?`<span class="dot-n">${notes}</span>`:''}<span class="chev">${I.chev}</span></button>
+  </section>`;
+}
+
+AFTER.home = () => {
+  const body = $('#homeBody');
+  const paint = () => { body.innerHTML = homeBody(); setupCarousel(); };
+  paint();
+  const q = $('#q');
+  q.addEventListener('input', () => {
+    Q = q.value;
+    q.parentElement.querySelector('.clear').hidden = !Q;
+    paint();
+  });
+};
+
+function setupCarousel(){
+  clearInterval(carTimer);
+  const car = $('#car'), dots = $('#dots');
+  if(!car) return;
+  const spans = [...dots.children];
+  const idx = () => Math.round(car.scrollLeft / car.clientWidth);
+  car.addEventListener('scroll', () => spans.forEach((s,i) => s.classList.toggle('on', i === idx())), {passive:true});
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(!reduce){
+    carTimer = setInterval(() => {
+      if(!document.body.contains(car)) return clearInterval(carTimer);
+      const next = (idx() + 1) % spans.length;
+      car.scrollTo({left: next * car.clientWidth, behavior:'smooth'});
+    }, 5000);
+  }
+}
+
+/* LIST (all items or one category) */
+VIEWS.list = c => {
+  const f = c.f || 'all';
+  let items = sorted();
+  if(c.cat) items = items.filter(i => i.cat === c.cat);
+  if(f !== 'all') items = items.filter(i => i.status === f);
+  const chip = (k,l) => `<button class="chip ${f===k?'on':''}" data-a="filter" data-f="${k}">${l}</button>`;
+  return topbar(c.title) + `<div class="pad body stack">
+    <div class="chips">${chip('all','All')}${chip('lost','Lost')}${chip('found','Found')}${chip('returned','Returned')}</div>
+    <p class="count">${items.length} item${items.length===1?'':'s'}</p>
+    ${itemList(items, 'Nothing here yet. If you lost or found something, report it so others can help.')}
+  </div>`;
+};
+
+/* MY ITEMS */
+VIEWS.mine = c => {
+  const f = c.f || 'lost';
+  const items = sorted().filter(i => i.mine && i.status === f);
+  const chip = (k,l) => `<button class="chip ${f===k?'on':''}" data-a="filter" data-f="${k}">${l} (${S.items.filter(i=>i.mine&&i.status===k).length})</button>`;
+  return topbar('My Items') + `<div class="pad body stack">
+    <div class="chips">${chip('lost','Lost')}${chip('found','Found')}${chip('returned','Returned')}</div>
+    ${itemList(items, f==='returned' ? 'No returned items yet.' : `You have no ${f} items right now.`)}
+    <button class="primary ${f==='lost'?'orange':''}" data-a="report" data-t="${f==='found'?'found':'lost'}">${I.tag}Report a ${f==='found'?'found':'lost'} item</button>
+  </div>`;
+};
+
+/* ITEM DETAIL */
+VIEWS.detail = c => {
+  const it = byId(c.id);
+  if(!it) return topbar('Item') + `<div class="pad body">${emptyBox('This item was removed.')}</div>`;
+  let actions = '';
+  if(it.mine){
+    if(c.confirm){
+      actions = `<div class="confirm"><b>Delete this post?</b><span class="note">Other students will not see it any more. This cannot be undone.</span>
+        <div class="row"><button class="secondary" data-a="cancelDel">Keep it</button><button class="primary" style="background:var(--red)" data-a="doDel" data-id="${it.id}">Delete</button></div></div>`;
+    } else {
+      actions = (it.status !== 'returned'
+        ? `<button class="primary" data-a="returned" data-id="${it.id}">${I.check}${it.status==='lost'?'I got it back':'Mark as returned to owner'}</button>`
+        : `<p class="note">This item was returned. Great work!</p>`)
+        + `<button class="secondary danger" data-a="askDel">${I.trash}Delete post</button>`;
+    }
+  } else if(it.status === 'found'){
+    actions = `<button class="primary" data-a="contact" data-id="${it.id}">${I.chat}This is mine</button><p class="note">The finder will get a message. Bring your school ID card when you collect it.</p>`;
+  } else if(it.status === 'lost'){
+    actions = `<button class="primary orange" data-a="contact" data-id="${it.id}">${I.chat}I found it</button><p class="note">The owner will get a message. Please give the item to the reception.</p>`;
+  } else {
+    actions = `<p class="note">This item was returned to its owner.</p>`;
+  }
+  return topbar(it.title) + `<div class="pad body stack">
+    <div class="thumb photo-big t-${it.cat}">${pic(it)}</div>
+    <div class="d-title"><span class="pill ${it.status}">${statusLabel(it.status)}</span><h1>${esc(it.title)}</h1></div>
+    <div class="facts">
+      <div class="fact">${I.pin}<div><small>${it.status==='lost'?'Lost at':'Found at'}</small><span>${esc(it.loc)}</span></div></div>
+      <div class="fact">${I.cal}<div><small>Date</small><span>${fmtDate(it.date)}</span></div></div>
+      <div class="fact">${I.tag}<div><small>Category</small><span>${esc(it.cat)}</span></div></div>
+      <div class="fact">${I.user}<div><small>Posted by</small><span>${it.mine?'You':esc(it.by)}${it.byInfo&&!it.mine?` · ${esc(it.byInfo)}`:''}</span></div></div>
+    </div>
+    ${it.desc ? `<p class="desc">${esc(it.desc)}</p>` : ''}
+    <div class="actions">${actions}</div>
+  </div>`;
+};
+
+/* REPORT FORM */
+VIEWS.form = c => {
+  const lost = c.type === 'lost';
+  return topbar(lost ? 'Report Lost Item' : 'Report Found Item') + `<form id="f" class="pad body form" novalidate>
+    <div class="seg" role="group" aria-label="Type of report">
+      <button type="button" data-a="settype" data-t="lost" class="${lost?'on':''}">I lost something</button>
+      <button type="button" data-a="settype" data-t="found" class="${!lost?'on':''}">I found something</button>
+    </div>
+    <div class="field">
+      <span class="lbl">Photo (optional)</span>
+      <label class="photo-pick" for="fPhoto" id="photoBox">${c.photo ? `<img src="${c.photo}" alt="Chosen photo">` : `<span class="in">${I.camera}Add a photo</span>`}</label>
+      <input type="file" id="fPhoto" accept="image/*" hidden>
+    </div>
+    <div class="field" id="wTitle">
+      <label for="fTitle">Item name</label>
+      <input id="fTitle" maxlength="40" placeholder="e.g. Black water bottle">
+    </div>
+    <div class="field" id="wCat">
+      <span class="lbl">Category</span>
+      <div class="catpick">${CATS.map(k => `<input type="radio" name="fCat" id="cat-${k}" value="${k}"><label for="cat-${k}">${k}</label>`).join('')}</div>
+    </div>
+    <div class="field" id="wLoc">
+      <label for="fLoc" id="locLbl">${lost?'Where did you lose it?':'Where did you find it?'}</label>
+      <input id="fLoc" list="places" maxlength="40" placeholder="e.g. Library">
+      <datalist id="places">${PLACES.map(p=>`<option value="${p}">`).join('')}</datalist>
+    </div>
+    <div class="field">
+      <label for="fDate">Date</label>
+      <input id="fDate" type="date" value="${todayISO()}" max="${todayISO()}">
+    </div>
+    <div class="field">
+      <label for="fDesc">Details (colour, brand, name on it)</label>
+      <textarea id="fDesc" maxlength="300" placeholder="e.g. Steel bottle with a blue cap and my name sticker"></textarea>
+    </div>
+    <p class="ferr" id="fErr" role="alert" hidden></p>
+    <button class="primary ${lost?'orange':''}" id="fSubmit" type="submit">${I.check}Post item</button>
+  </form>`;
+};
+AFTER.form = c => {
+  $('#fPhoto').addEventListener('change', e => {
+    const file = e.target.files[0]; if(!file) return;
+    shrinkPhoto(file, url => { c.photo = url; $('#photoBox').innerHTML = `<img src="${url}" alt="Chosen photo">`; });
+  });
+  $('#f').addEventListener('submit', e => {
+    e.preventDefault();
+    const title = $('#fTitle').value.trim();
+    const catEl = document.querySelector('input[name="fCat"]:checked');
+    const loc = $('#fLoc').value.trim();
+    const date = $('#fDate').value || todayISO();
+    const err = $('#fErr');
+    document.querySelectorAll('.field.bad').forEach(x => x.classList.remove('bad'));
+    const fail = (id, msg, focus) => { $(id).classList.add('bad'); err.textContent = msg; err.hidden = false; focus && focus.focus(); };
+    if(!title) return fail('#wTitle', 'Please write the name of the item.', $('#fTitle'));
+    if(!catEl) return fail('#wCat', 'Please choose a category.');
+    if(!loc) return fail('#wLoc', c.type==='lost' ? 'Please write where you lost it.' : 'Please write where you found it.', $('#fLoc'));
+    if(date > todayISO()) return fail('#wLoc', 'The date cannot be in the future.');
+    const item = {
+      id:'i' + Date.now(), title, status:c.type, cat:catEl.value, kind:CAT_KIND[catEl.value],
+      loc, date, desc:$('#fDesc').value.trim(), by:ME.name, byInfo:ME.cls, mine:true, photo:c.photo || null
+    };
+    S.items.unshift(item);
+    S.alerts.unshift({id:'a'+Date.now(), t:`Your post "${title}" is now live`, at:nowISO(), read:false, itemId:item.id});
+    save();
+    toast('Item posted');
+    replace('detail', {id:item.id});
+  });
+};
+
+/* Make a photo smaller so it fits in browser storage */
+function shrinkPhoto(file, done){
+  const reader = new FileReader();
+  reader.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      const max = 600, k = Math.min(1, max / Math.max(img.width, img.height));
+      const cv = document.createElement('canvas'); cv.width = img.width * k; cv.height = img.height * k;
+      cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+      done(cv.toDataURL('image/jpeg', 0.72));
+    };
+    img.onerror = () => toast('This file is not a photo. Please choose a JPG or PNG.');
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+/* MESSAGES */
+VIEWS.messages = () => {
+  const chats = [...S.chats].sort((a,b) => b.msgs[b.msgs.length-1].at.localeCompare(a.msgs[a.msgs.length-1].at));
+  return topbar('Messages', {noBack:true}) + `<div class="pad body">
+    ${chats.length ? `<div class="list">${chats.map(ch => {
+      const last = ch.msgs[ch.msgs.length-1]; const it = ch.itemId && byId(ch.itemId);
+      return `<button class="crow ${ch.unread?'unread':''}" data-a="chat" data-id="${ch.id}">
+        <span class="ava" style="background:${avaColor(ch.with)}">${initials(ch.with)}</span>
+        <span class="info">
+          <span class="top"><b>${esc(ch.with)}</b><time>${fmtTime(last.at)}</time></span>
+          ${it ? `<span class="about">About: ${esc(it.title)}</span>` : ''}
+          <span class="last">${last.me?'You: ':''}${esc(last.t)}</span>
+        </span>
+        ${ch.unread ? `<span class="dot-n">${ch.unread}</span>` : ''}
+      </button>`;}).join('')}</div>` : emptyBox('No messages yet. When you tap "This is mine" or "I found it" on an item, the chat appears here.')}
+  </div>`;
+};
+
+/* ONE CHAT */
+VIEWS.chat = c => {
+  const ch = S.chats.find(x => x.id === c.id);
+  const it = ch.itemId && byId(ch.itemId);
+  return topbar(ch.with) + `<div class="pad">
+    ${it ? `<div class="about-card">${rowItem(it)}</div>` : ''}
+    <div class="thread" id="thread">${threadHTML(ch)}</div>
+  </div>
+  <form class="composer" id="composer">
+    <input id="cMsg" placeholder="Write a message..." autocomplete="off" maxlength="300" aria-label="Message">
+    <button type="submit" aria-label="Send">${I.send}</button>
+  </form>`;
+};
+function threadHTML(ch){
+  return ch.msgs.map(m => `<div class="bub ${m.me?'me':'them'}">${esc(m.t)}<small>${fmtTime(m.at)}</small></div>`).join('') + (ch.typing ? `<div class="typing">${esc(ch.with.split(' ')[0])} is typing…</div>` : '');
+}
+AFTER.chat = c => {
+  const ch = S.chats.find(x => x.id === c.id);
+  if(ch.unread){ ch.unread = 0; save(); }
+  const paint = () => { const t = $('#thread'); if(t){ t.innerHTML = threadHTML(ch); window.scrollTo(0, document.body.scrollHeight); } };
+  paint();
+  $('#composer').addEventListener('submit', e => {
+    e.preventDefault();
+    const inp = $('#cMsg'); const text = inp.value.trim(); if(!text) return;
+    ch.msgs.push({me:true, t:text, at:nowISO()}); inp.value = ''; save(); paint();
+    autoReply(ch, paint);
+  });
+};
+/* A pretend reply, so the demo feels real */
+function autoReply(ch, paint){
+  if(ch.replied) return;
+  ch.replied = true; ch.typing = true; paint();
+  const it = ch.itemId && byId(ch.itemId);
+  const lost = it && it.status === 'lost' && !it.mine;
+  setTimeout(() => {
+    ch.typing = false;
+    ch.msgs.push({me:false, at:nowISO(), t: lost
+      ? 'Thank you so much! I will collect it from the reception today.'
+      : 'Sure! Please come to the reception in the lunch break. Bring your school ID card.'});
+    save();
+    if(cur().v === 'chat' && cur().id === ch.id) paint(); else ch.unread = 1, save();
+  }, 1600);
+}
+
+/* ALERTS */
+VIEWS.alerts = () => topbar('Alerts', {noBack:true, right: unreadAlerts() ? `<button class="small-btn" data-a="readAll">Mark all read</button>` : ''}) + `<div class="pad body">
+  ${S.alerts.length ? `<div class="list">${S.alerts.map(a => `<button class="arow ${a.read?'':'unread'}" data-a="alert" data-id="${a.id}">
+      <span class="aic">${I.bell}</span>
+      <span class="info"><span>${esc(a.t)}</span><time>${fmtTime(a.at)}</time></span>
+      ${a.read ? '' : '<span class="udot" aria-label="Unread"></span>'}
+    </button>`).join('')}</div>` : emptyBox('No alerts.')}
+</div>`;
+
+/* PROFILE */
+VIEWS.profile = c => {
+  const mine = S.items.filter(i => i.mine);
+  return topbar('Profile', {noBack:true}) + `<div class="pad body stack">
+    <div class="prof"><div class="avatar">${ME.initials}</div><h1>${esc(ME.name)}</h1><p>${ME.cls} · ${ME.role}</p><p>${ME.school}</p></div>
+    <div class="stats">
+      <div class="stat"><b>${mine.length}</b><span>Posts</span></div>
+      <div class="stat"><b>${mine.filter(i=>i.status==='found').length}</b><span>Items I found</span></div>
+      <div class="stat"><b>${mine.filter(i=>i.status==='returned').length}</b><span>Returned</span></div>
+    </div>
+    <div class="list">
+      <button class="rowbtn" data-a="go" data-v="mine">${I.list}<span class="grow">My Items</span><span class="chev">${I.chev}</span></button>
+      <button class="rowbtn" data-a="how">${I.info}<span class="grow">How it works</span><span class="chev">${I.chev}</span></button>
+      ${c.confirmReset
+        ? `<div class="confirm"><b>Reset the demo?</b><span class="note">All posts and messages go back to the sample data.</span><div class="row"><button class="secondary" data-a="noReset">Cancel</button><button class="primary" style="background:var(--red)" data-a="doReset">Reset</button></div></div>`
+        : `<button class="rowbtn" data-a="askReset">${I.reset}<span class="grow">Reset demo data</span><span class="chev">${I.chev}</span></button>`}
+    </div>
+  </div>`;
+};
+
+/* ---------- 8. Button actions ---------- */
+const ACT = {
+  tab: d => tab(d.v),
+  go: d => go(d.v, d.f ? {f:d.f} : {}),
+  back: () => back(),
+  open: d => go('detail', {id:d.id}),
+  list: d => go('list', {title:d.title, cat:d.cat}),
+  filter: d => { cur().f = d.f; render(); },
+  report: d => { closeModal(); go('form', {type:d.t}); },
+  settype: d => {
+    cur().type = d.t;
+    document.querySelectorAll('.seg button').forEach(b => b.classList.toggle('on', b.dataset.t === d.t));
+    $('.tb-in h2').textContent = d.t === 'lost' ? 'Report Lost Item' : 'Report Found Item';
+    $('#locLbl').textContent = d.t === 'lost' ? 'Where did you lose it?' : 'Where did you find it?';
+    $('#fSubmit').classList.toggle('orange', d.t === 'lost');
+  },
+  clearq: (d, el, e) => { e.preventDefault(); Q = ''; render(); $('#q').focus(); },
+  scan: () => $('#scanInput').click(),
+  fab: () => modal(`<h3>What happened?</h3>
+      <button class="primary orange" data-a="report" data-t="lost">${I.search}I lost something</button>
+      <button class="primary" data-a="report" data-t="found">${I.box}I found something</button>
+      <button class="secondary" data-a="close">Cancel</button>`),
+  menu: () => modal(`<h3>Menu</h3>
+      <button class="rowbtn" data-a="mgo" data-v="mine">${I.list}<span class="grow">My Items</span><span class="chev">${I.chev}</span></button>
+      <button class="rowbtn" data-a="mgo" data-v="list">${I.box}<span class="grow">All Items</span><span class="chev">${I.chev}</span></button>
+      <button class="rowbtn" data-a="mtab" data-v="messages">${I.chat}<span class="grow">Messages</span><span class="chev">${I.chev}</span></button>
+      <button class="rowbtn" data-a="mtab" data-v="profile">${I.user}<span class="grow">Profile</span><span class="chev">${I.chev}</span></button>
+      <button class="rowbtn" data-a="how">${I.info}<span class="grow">How it works</span><span class="chev">${I.chev}</span></button>`),
+  mgo: d => { closeModal(); d.v === 'list' ? go('list', {title:'All Items'}) : go(d.v); },
+  mtab: d => { closeModal(); tab(d.v); },
+  how: () => modal(`<h3>How it works</h3>
+      <ol class="steps">
+        <li><span><b>Report the item.</b> Add a photo, the place and the date.</span></li>
+        <li><span><b>Get a message.</b> The owner or the finder writes to you in Messages.</span></li>
+        <li><span><b>Meet at the reception.</b> Show your school ID card and collect the item.</span></li>
+        <li><span><b>Mark it as returned.</b> The post moves to "Returned".</span></li>
+      </ol>
+      <p class="note">Found items must go to the reception on the same day.</p>
+      <button class="secondary" data-a="close">Close</button>`),
+  close: () => closeModal(),
+  contact: d => {
+    const it = byId(d.id);
+    let ch = S.chats.find(x => x.itemId === it.id && x.with === it.by);
+    if(!ch){ ch = {id:'c'+Date.now(), with:it.by, itemId:it.id, unread:0, replied:false, msgs:[]}; S.chats.push(ch); }
+    ch.msgs.push({me:true, at:nowISO(), t: it.status === 'found'
+      ? `Hi, I think the ${it.title} is mine. Can I collect it?`
+      : `Hi, I found your ${it.title}. I will give it to the reception.`});
+    save(); toast('Message sent');
+    go('chat', {id:ch.id});
+    autoReply(ch, () => { const t = $('#thread'); if(t){ t.innerHTML = threadHTML(ch); window.scrollTo(0, document.body.scrollHeight); } });
+  },
+  returned: d => { const it = byId(d.id); it.status = 'returned'; save(); toast('Marked as returned'); render(); },
+  askDel: () => { cur().confirm = true; render(); },
+  cancelDel: () => { cur().confirm = false; render(); },
+  doDel: d => {
+    S.items = S.items.filter(i => i.id !== d.id);
+    S.alerts = S.alerts.filter(a => a.itemId !== d.id);
+    save(); toast('Post deleted'); back();
+  },
+  chat: d => go('chat', {id:d.id}),
+  readAll: () => { S.alerts.forEach(a => a.read = true); save(); render(); },
+  alert: d => {
+    const a = S.alerts.find(x => x.id === d.id); a.read = true; save();
+    if(a.itemId && byId(a.itemId)) go('detail', {id:a.itemId}); else render();
+  },
+  askReset: () => { cur().confirmReset = true; render(); },
+  noReset: () => { cur().confirmReset = false; render(); },
+  doReset: () => { S = seed(); save(); Q = ''; toast('Demo data reset'); tab('home'); }
+};
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-a]');
+  if(!t) return;
+  const fn = ACT[t.dataset.a];
+  if(fn) fn(t.dataset, t, e);
+});
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal(); });
+
+/* The scan button: choose a photo, then fill the "Report Found Item" form */
+$('#scanInput').addEventListener('change', e => {
+  const file = e.target.files[0]; if(!file) return;
+  shrinkPhoto(file, url => go('form', {type:'found', photo:url}));
+  e.target.value = '';
+});
+
+/* ---------- 9. Start the app ---------- */
+render();
+const splash = $('#splash');
+const hideSplash = () => { splash.classList.add('hide'); setTimeout(() => splash.remove(), 500); };
+splash.addEventListener('click', hideSplash);
+setTimeout(hideSplash, 1800);
+</script>
+</body>
+</html>
